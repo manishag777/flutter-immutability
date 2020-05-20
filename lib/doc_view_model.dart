@@ -4,36 +4,28 @@ import 'package:immutability/entity.dart';
 import 'package:kt_dart/collection.dart';
 
 class DocViewModel extends BaseViewModel{
-  List<Document> documentState;
-  int currentIndex;
+  // List<Document> documentState;
   Document document;
   DocViewModel(){
     document = Document.empty();
-    documentState = [document];
-    currentIndex = 0;
+    modelState.add(document);
   }
   
-  void _updateDocumentState(){
-    documentState = documentState.sublist(0, currentIndex+1);
-    documentState.add(document);
-    currentIndex = currentIndex+1;
-  }
-
   void addElement(){
-    setBusy(true);
-    KtMutableList<DocElement> docElements = document.body.elements.toMutableList();
+    setState(ViewState.loading);
+    final KtMutableList<DocElement> docElements = document.body.elements.toMutableList();
     docElements.add(DocElement.empty());
     document =  document.copyWith(
       body: document.body.copyWith(
         elements: docElements.toList()
         ));
-    _updateDocumentState();    
-    setBusy(false);    
+    updateModelState(document);    
+    setState(ViewState.loaded);    
 
   }
   
   void removeElement(){
-    setBusy(true);
+    setState(ViewState.loading);
     final KtMutableList<DocElement> docElements = document.body.elements.toMutableList();
     if(docElements.size>1){
       docElements.removeAt(docElements.size-1);
@@ -42,28 +34,26 @@ class DocViewModel extends BaseViewModel{
           elements: docElements.toList())
           );
     }
-    _updateDocumentState();    
-    setBusy(false);    
+    updateModelState(document);    
+    setState(ViewState.loaded);    
   }
 
   void undo(){
-    setBusy(true);
-    if(currentIndex>0){
-      final int newIndex = currentIndex-1;
-      document = documentState[newIndex];
-      currentIndex = newIndex;
+    setState(ViewState.loading);
+    final Object _object = undoObject;
+    if(_object!=null) {
+      document = _object as Document;
     }
-    setBusy(false);
+    setState(ViewState.loaded);
   }
 
   void redo(){
-    setBusy(true);
-    if(currentIndex<documentState.length-1){
-      final int newIndex = currentIndex+1;
-      document = documentState[newIndex];
-      currentIndex = newIndex;
+    setState(ViewState.loading);
+    final Object _object = redoObject;
+    if(_object!=null) {
+      document = _object as Document;
     }
-    setBusy(false);
+    setState(ViewState.loaded);
   }
 
 }

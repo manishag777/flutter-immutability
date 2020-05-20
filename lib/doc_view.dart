@@ -12,6 +12,7 @@ class DocView extends StatelessWidget {
       onModelReady: (model){},
       builder: (context, model, child){
         return Column(children: <Widget>[
+          Text('State ${model.modelStateIndex}'),
           Row(children: <Widget>[
             RaisedButton(child: const Text('Add'), onPressed: (){
               model.addElement();

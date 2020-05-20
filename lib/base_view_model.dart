@@ -1,27 +1,55 @@
 // base_view_model.dart
 import 'package:flutter/material.dart';
 
-enum ViewState {BUSY, IDLE, ERROR}
+enum ViewState {loading, loaded, error}
 
 class BaseViewModel extends ChangeNotifier {
+  List<Object> modelState = [];
+  Object currentModel;
+  int currentIndex = 0;
 
   String error;
-  bool _busy = false;
-  bool get busy => _busy;
-  ViewState state = ViewState.IDLE;
+  ViewState state = ViewState.loaded;
 
   void setState(ViewState state){
-    print(state);
     this.state = state;
-    notifyListeners();
-  }
-
-  void setBusy(bool value) {
-    _busy = value;
     notifyListeners();
   }
 
   void notifyChanged(){
     notifyListeners();
   }
+
+  int get modelStateIndex => currentIndex;
+
+  @protected
+  void updateModelState(Object object){
+    currentModel = object;  
+    modelState = modelState.sublist(0, currentIndex+1);
+    modelState.add(currentModel);
+    currentIndex = currentIndex+1;
+  }
+
+  @protected
+  Object get undoObject{
+    if(currentIndex>0){
+      final int newIndex = currentIndex-1;
+      currentModel = modelState[newIndex];
+      currentIndex = newIndex;
+      return currentModel;
+    }
+    return null;    
+  }
+
+  @protected
+  Object get redoObject{
+    if(currentIndex<modelState.length-1){
+      final int newIndex = currentIndex+1;
+      currentModel = modelState[newIndex];
+      currentIndex = newIndex;
+      return currentModel;
+    }
+    return null;    
+  }
+
 }
